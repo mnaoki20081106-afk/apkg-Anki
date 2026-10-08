@@ -1,0 +1,28 @@
+name: Export AnkiPlan source for debugging
+on:
+  push:
+    branches: [ankiplan-v10-options-plan-20261008]
+    paths: ['.github/workflows/export-source-debug.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          python3 - <<'PY'
+          import base64,lzma,tarfile,io,pathlib
+          src=pathlib.Path('anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64')
+          blob=lzma.decompress(base64.b64decode(src.read_text()))
+          dest=pathlib.Path('ankiplan-v10-src');dest.mkdir(exist_ok=True)
+          with tarfile.open(fileobj=io.BytesIO(blob),mode='r:') as tar:
+              tar.extractall(dest,filter='data')
+          print('files:',*[str(p) for p in dest.rglob('*') if p.is_file()],sep='\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ankiplan-v10-src
+          path: ankiplan-v10-src
+          if-no-files-found: error
