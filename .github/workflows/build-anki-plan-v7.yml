@@ -1,4 +1,4 @@
-name: Build AnkiPlan v13 signed daily limit fix dylib
+name: Build AnkiPlan v14 unified plan apply dylib
 on:
   push:
     branches: [ankiplan-v10-options-plan-20261008]
@@ -23,7 +23,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="2ad157e668d8fa11e94abf64c8e2ea74e2312cbe5c182ec306fc70d31ad095b6"
+          expected="316604c6e24bfafa705d25721670aa01e6137c07ba015cb6a9c1f2db52987b78"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -47,7 +47,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="2ad157e668d8fa11e94abf64c8e2ea74e2312cbe5c182ec306fc70d31ad095b6"
+          expected="316604c6e24bfafa705d25721670aa01e6137c07ba015cb6a9c1f2db52987b78"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -70,6 +70,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v13-signed-limits-dylib
+          name: ankiplan-v14-unified-apply-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
