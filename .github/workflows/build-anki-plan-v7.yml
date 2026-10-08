@@ -33,7 +33,7 @@ jobs:
           set -euo pipefail
           cd anki-plan-v7/build
           SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
-          xcrun --sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.2 -fobjc-arc -dynamiclib -isysroot "$SDK"             -Wall -Wextra -Werror -Wno-deprecated-declarations -Wno-unused-parameter             AnkiPlanTweak.m AnkiImportBridge.m core/PlanCore.c             -framework UIKit -framework WebKit -framework Foundation             -Wl,-install_name,@executable_path/Frameworks/AnkiPlanTweak.dylib             -o ../AnkiPlanTweak.dylib
+          xcrun --sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.2 -fobjc-arc -dynamiclib -isysroot "$SDK"             -Wall -Wextra -Werror -Wno-deprecated-declarations -Wno-unused-parameter             AnkiPlanTweak.m AnkiImportBridge.m core/PlanCore.c             -framework UIKit -framework WebKit -framework Foundation -framework CoreGraphics             -Wl,-install_name,@executable_path/Frameworks/AnkiPlanTweak.dylib             -o ../AnkiPlanTweak.dylib
           codesign --force --sign - ../AnkiPlanTweak.dylib
           codesign --verify --strict ../AnkiPlanTweak.dylib
           file ../AnkiPlanTweak.dylib
