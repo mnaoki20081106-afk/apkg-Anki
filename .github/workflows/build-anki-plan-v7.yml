@@ -1,7 +1,7 @@
-name: Build AnkiPlan v8 dylib
+name: Build AnkiPlan v9 crashfix dylib
 on:
   push:
-    branches: [ankiplan-v8-build-20261008]
+    branches: [ankiplan-v9-crashfix-20261008]
     paths:
       - ".github/workflows/build-anki-plan-v7.yml"
       - "anki-plan-v7/**"
@@ -21,7 +21,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="8674288a170f48bc551449ff13196a5871be0a0d621e42b8f8395be5e8e33f4a"
+          expected="fcfa5a80956b75a7a662a06e3bfa322f8484ccc05f4dd4dc5d34aabf3f2bb2b9"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -40,6 +40,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v8-dylib
+          name: ankiplan-v9-crashfix-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
