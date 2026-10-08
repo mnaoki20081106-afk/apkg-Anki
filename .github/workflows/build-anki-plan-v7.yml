@@ -21,7 +21,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="c6577c4c9b8dade9f2f34d4915d0ab1696ddd3dd1051f54bd5c0ee3a2dec85d0"
+          expected="02996e8df1b0bca0735db8bebcc85faf86c42498918e10fd790bba4bd614e1c8"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
