@@ -1,4 +1,4 @@
-name: Build AnkiPlan v12 live DB discovery dylib
+name: Build AnkiPlan v13 signed daily limit fix dylib
 on:
   push:
     branches: [ankiplan-v10-options-plan-20261008]
@@ -9,7 +9,33 @@ on:
 permissions:
   contents: read
 jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore exact v7 sources
+        run: |
+          python3 - <<'PY'
+          import base64, lzma, tarfile, io, pathlib, hashlib
+          p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
+          compressed=base64.b64decode("".join(p.read_text().split()))
+          digest=hashlib.sha256(compressed).hexdigest()
+          expected="2ad157e668d8fa11e94abf64c8e2ea74e2312cbe5c182ec306fc70d31ad095b6"
+          assert digest==expected, (digest,expected)
+          blob=lzma.decompress(compressed)
+          with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
+              tar.extractall(path="anki-plan-v7/build",filter="data")
+          print("restored sources SHA256",digest)
+          PY
+      - name: Verify actual Anki 25.9 scheduler
+        run: |
+          python3 -m pip install anki==25.9
+          python3 anki-plan-v7/build/tools/verify_scheduler_backend.py
   build:
+    needs: backend
     runs-on: macos-15
     timeout-minutes: 20
     steps:
@@ -21,7 +47,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="52ceb83ae18cf8a7152143f3a58e8ac7418ef56f4629ee671d21a89711093f02"
+          expected="2ad157e668d8fa11e94abf64c8e2ea74e2312cbe5c182ec306fc70d31ad095b6"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -44,6 +70,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v12-live-db-dylib
+          name: ankiplan-v13-signed-limits-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
