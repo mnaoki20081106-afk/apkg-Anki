@@ -1,7 +1,7 @@
-name: Build AnkiPlan v9 crashfix dylib
+name: Build AnkiPlan v10 options-only dylib
 on:
   push:
-    branches: [ankiplan-v9-crashfix-20261008]
+    branches: [ankiplan-v10-options-plan-20261008]
     paths:
       - ".github/workflows/build-anki-plan-v7.yml"
       - "anki-plan-v7/**"
@@ -21,13 +21,17 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="fcfa5a80956b75a7a662a06e3bfa322f8484ccc05f4dd4dc5d34aabf3f2bb2b9"
+          expected="2e76e7282e5842e7542215619c7a050bf77e545d1112110ce0b18db81eceea44"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
               tar.extractall(path="anki-plan-v7/build",filter="data")
           print("restored sources SHA256",digest)
           PY
+      - name: Run planner regression tests
+        run: |
+          cd anki-plan-v7/build
+          python3 -m unittest discover -s tests -q
       - name: Build signed arm64 iOS tweak
         run: |
           set -euo pipefail
@@ -40,6 +44,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v9-crashfix-dylib
+          name: ankiplan-v10-options-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
