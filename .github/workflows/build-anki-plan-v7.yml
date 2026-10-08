@@ -1,0 +1,45 @@
+name: Build AnkiPlan v7 dylib
+on:
+  push:
+    branches: [ankiplan-v7-build-20261008]
+    paths:
+      - ".github/workflows/build-anki-plan-v7.yml"
+      - "anki-plan-v7/**"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore exact v7 sources
+        run: |
+          python3 - <<'PY'
+          import base64, lzma, tarfile, io, pathlib, hashlib
+          p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
+          compressed=base64.b64decode("".join(p.read_text().split()))
+          digest=hashlib.sha256(compressed).hexdigest()
+          expected="258592d2cbfbb07f82b2735dd258357152cf93affbbc081410f021b9ea629508"
+          assert digest==expected, (digest,expected)
+          blob=lzma.decompress(compressed)
+          with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
+              tar.extractall(path="anki-plan-v7/build",filter="data")
+          print("restored sources SHA256",digest)
+          PY
+      - name: Build signed arm64 iOS tweak
+        run: |
+          set -euo pipefail
+          cd anki-plan-v7/build
+          SDK="$(xcrun --sdk iphoneos --show-sdk-path)"
+          xcrun --sdk iphoneos clang -arch arm64 -miphoneos-version-min=15.2 -fobjc-arc -dynamiclib -isysroot "$SDK"             -Wall -Wextra -Werror -Wno-deprecated-declarations -Wno-unused-parameter             AnkiPlanTweak.m AnkiImportBridge.m core/PlanCore.c             -framework UIKit -framework WebKit -framework Foundation             -Wl,-install_name,@executable_path/Frameworks/AnkiPlanTweak.dylib             -o ../AnkiPlanTweak.dylib
+          codesign --force --sign - ../AnkiPlanTweak.dylib
+          codesign --verify --strict ../AnkiPlanTweak.dylib
+          file ../AnkiPlanTweak.dylib
+          shasum -a 256 ../AnkiPlanTweak.dylib
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ankiplan-v7-dylib
+          path: anki-plan-v7/AnkiPlanTweak.dylib
+          if-no-files-found: error
