@@ -1,4 +1,4 @@
-name: Build AnkiPlan v11 SQLite count dylib
+name: Build AnkiPlan v12 live DB discovery dylib
 on:
   push:
     branches: [ankiplan-v10-options-plan-20261008]
@@ -21,7 +21,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="02996e8df1b0bca0735db8bebcc85faf86c42498918e10fd790bba4bd614e1c8"
+          expected="52ceb83ae18cf8a7152143f3a58e8ac7418ef56f4629ee671d21a89711093f02"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -44,6 +44,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v11-sqlite-dylib
+          name: ankiplan-v12-live-db-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
