@@ -1,4 +1,4 @@
-name: Build AnkiPlan v14 unified plan apply dylib
+name: Build AnkiPlan v15 quota auto unlock dylib
 on:
   push:
     branches: [ankiplan-v10-options-plan-20261008]
@@ -23,7 +23,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="316604c6e24bfafa705d25721670aa01e6137c07ba015cb6a9c1f2db52987b78"
+          expected="826321c01a25d720a03aaa010d3f4ecb41ea5a9264c89f812ddd0091106f4756"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -34,6 +34,7 @@ jobs:
         run: |
           python3 -m pip install anki==25.9
           python3 anki-plan-v7/build/tools/verify_scheduler_backend.py
+          python3 anki-plan-v7/build/tools/verify_daily_quota_backend.py
   build:
     needs: backend
     runs-on: macos-15
@@ -47,7 +48,7 @@ jobs:
           p=pathlib.Path("anki-plan-v7/AnkiPlan-v7-src.tar.xz.b64")
           compressed=base64.b64decode("".join(p.read_text().split()))
           digest=hashlib.sha256(compressed).hexdigest()
-          expected="316604c6e24bfafa705d25721670aa01e6137c07ba015cb6a9c1f2db52987b78"
+          expected="826321c01a25d720a03aaa010d3f4ecb41ea5a9264c89f812ddd0091106f4756"
           assert digest==expected, (digest,expected)
           blob=lzma.decompress(compressed)
           with tarfile.open(fileobj=io.BytesIO(blob),mode="r:") as tar:
@@ -70,6 +71,6 @@ jobs:
           shasum -a 256 ../AnkiPlanTweak.dylib
       - uses: actions/upload-artifact@v4
         with:
-          name: ankiplan-v14-unified-apply-dylib
+          name: ankiplan-v15-quota-auto-unlock-dylib
           path: anki-plan-v7/AnkiPlanTweak.dylib
           if-no-files-found: error
